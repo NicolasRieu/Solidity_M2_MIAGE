@@ -7,14 +7,6 @@
       }
     }
   },
-  "contracts/1_Storage.sol": {
-    "__sources__": {
-      "contracts/1_Storage.sol": {
-        "content": "// SPDX-License-Identifier: GPL-3.0\n\npragma solidity >=0.8.2 <0.9.0;\n\n/**\n * @title Storage\n * @dev Store & retrieve value in a variable\n * @custom:dev-run-script ./scripts/deploy_with_ethers.ts\n */\ncontract Storage {\n\n    uint256 number;\n\n    /**\n     * @dev Store value in variable\n     * @param num value to store\n     */\n    function store(uint256 num) public {\n        number = num;\n    }\n\n    /**\n     * @dev Return value \n     * @return value of 'number'\n     */\n    function retrieve() public view returns (uint256){\n        return number;\n    }\n}",
-        "file": "contracts/1_Storage.sol"
-      }
-    }
-  },
   "contracts/StorageOwnership1.sol": {
     "__sources__": {
       "contracts/StorageOwnership1.sol": {
@@ -52,6 +44,48 @@
       "contracts/StorageDelegation.sol": {
         "content": "// SPDX-License-Identifier: GPL-3.0\npragma solidity >=0.8.2 <0.9.0;\n\ncontract StorageDelegation {\n\n    uint256 number;\n    address public owner;\n    mapping(address => bool) public admins;\n    mapping(address => bool) public authorizedUsers;\n\n    constructor() {\n        owner = msg.sender;\n        admins[msg.sender] = true;\n        authorizedUsers[msg.sender] = true;\n    }\n\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"Reserves au createur.\");\n        _;\n    }\n\n    modifier onlyAdmin() {\n        require(admins[msg.sender], \"Reserves aux admins.\");\n        _;\n    }\n\n    modifier onlyAuthorized() {\n        require(authorizedUsers[msg.sender], \"Acces refuse.\");\n        _;\n    }\n\n    // Seul le owner peut nommer/démettre des admins\n    function grantAdmin(address user) public onlyOwner {\n        admins[user] = true;\n    }\n\n    function revokeAdmin(address user) public onlyOwner {\n        admins[user] = false;\n    }\n\n    // Les admins gèrent les utilisateurs autorisés\n    function grantAccess(address user) public onlyAdmin {\n        authorizedUsers[user] = true;\n    }\n\n    function revokeAccess(address user) public onlyAdmin {\n        authorizedUsers[user] = false;\n    }\n\n    function store(uint256 num) public onlyAuthorized {\n        number = num;\n    }\n\n    function retrieve() public view returns (uint256) {\n        return number;\n    }\n}",
         "file": "contracts/StorageDelegation.sol"
+      }
+    }
+  },
+  "contracts/1_Storage.sol": {
+    "__sources__": {
+      "contracts/1_Storage.sol": {
+        "content": "// SPDX-License-Identifier: GPL-3.0\n\npragma solidity >=0.8.2 <0.9.0;\n\n/**\n * @title Storage\n * @dev Store & retrieve value in a variable\n * @custom:dev-run-script ./scripts/deploy_with_ethers.ts\n */\ncontract Storage {\n\n    uint256 number;\n\n    /**\n     * @dev Store value in variable\n     * @param num value to store\n     */\n    function store(uint256 num) public {\n        number = num;\n    }\n\n    /**\n     * @dev Return value \n     * @return value of 'number'\n     */\n    function retrieve() public view returns (uint256){\n        return number;\n    }\n}",
+        "file": "contracts/1_Storage.sol"
+      }
+    }
+  },
+  "contracts/Virement.sol": {
+    "__sources__": {
+      "contracts/Virement.sol": {
+        "content": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity >=0.8.2 <0.9.0;\r\n\r\ncontract Virement {\r\n\r\n    // ── Déclaration de l'événement ──────────────────────────────────────────\r\n    //\r\n    // 'indexed' sur expediteur et destinataire permet de filtrer les logs\r\n    // par adresse — utile pour répondre à \"montre-moi tous les virements\r\n    // reçus par 0xABC...\" sur Etherscan ou depuis une dApp.\r\n    //\r\n    // 'montant' n'est pas indexed : pas besoin de filtrer par montant exact,\r\n    // et l'indexation coûte plus de gas.\r\n    //\r\n    event VirementEffectue(\r\n        address indexed expediteur,\r\n        address indexed destinataire,\r\n        uint256 montant,\r\n        uint256 timestamp\r\n    );\r\n\r\n    // ── Fonction de virement ────────────────────────────────────────────────\r\n    function virer(address payable destinataire) public payable {\r\n        require(msg.value > 0, \"Le montant doit etre superieur a zero.\");\r\n        require(destinataire != address(0), \"Adresse destinataire invalide.\");\r\n        require(destinataire != msg.sender, \"Impossible de se virer a soi-meme.\");\r\n\r\n        // Transfert des ETH\r\n        destinataire.transfer(msg.value);\r\n\r\n        // Emission de l'événement APRÈS le transfert (bonne pratique)\r\n        emit VirementEffectue(\r\n            msg.sender,\r\n            destinataire,\r\n            msg.value,\r\n            block.timestamp   // horodatage Unix du bloc actuel\r\n        );\r\n    }\r\n\r\n    // Permet à quiconque de consulter le solde du contrat (devrait toujours être 0)\r\n    function getBalance() public view returns (uint256) {\r\n        return address(this).balance;\r\n    }\r\n}",
+        "file": "contracts/Virement.sol"
+      }
+    }
+  },
+  "contracts/DataConsumer.sol": {
+    "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": ".deps/npm/@chainlink/contracts@1.5.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol",
+    "__sources__": {
+      "contracts/DataConsumer.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.7;\r\n\r\nimport {AggregatorV3Interface} from \"@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol\";\r\n\r\n/**\r\n * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED\r\n * VALUES FOR CLARITY.\r\n * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.\r\n * DO NOT USE THIS CODE IN PRODUCTION.\r\n */\r\n\r\n/**\r\n * If you are reading data feeds on L2 networks, you must\r\n * check the latest answer from the L2 Sequencer Uptime\r\n * Feed to ensure that the data is accurate in the event\r\n * of an L2 sequencer outage. See the\r\n * https://docs.chain.link/data-feeds/l2-sequencer-feeds\r\n * page for details.\r\n */\r\ncontract DataConsumerV3 {\r\n  AggregatorV3Interface internal dataFeed;\r\n\r\n  /**\r\n   * Network: Sepolia\r\n   * Aggregator: ETH/USD\r\n   * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306\r\n   */\r\n  constructor() {\r\n    dataFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);\r\n  }\r\n\r\n  /**\r\n   * Returns the latest answer.\r\n   */\r\n  function getChainlinkDataFeedLatestAnswer() public view returns (int256) {\r\n    // prettier-ignore\r\n    (\r\n      /* uint80 roundId */\r\n      ,\r\n      int256 answer,\r\n      /*uint256 startedAt*/\r\n      ,\r\n      /*uint256 updatedAt*/\r\n      ,\r\n      /*uint80 answeredInRound*/\r\n    ) = dataFeed.latestRoundData();\r\n    return answer;\r\n  }\r\n}\r\n",
+        "file": "contracts/DataConsumer.sol"
+      },
+      "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n// solhint-disable-next-line interface-starts-with-i\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(\n    uint80 _roundId\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n\n  function latestRoundData()\n    external\n    view\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n}\n",
+        "file": "@chainlink/contracts@1.5.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol"
+      }
+    }
+  },
+  "contracts/Donation.sol": {
+    "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": ".deps/npm/@chainlink/contracts@1.5.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol",
+    "__sources__": {
+      "contracts/Donation.sol": {
+        "content": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity >=0.8.2 <0.9.0;\r\n\r\nimport {AggregatorV3Interface} from \"@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol\";\r\n\r\n\r\ncontract Donation {\r\n\r\n    AggregatorV3Interface internal dataFeed;\r\n\r\n    address public owner;\r\n\r\n    event DonationRecue(address donateur, uint256 montant);\r\n    event RetraitEffectue(address owner, uint256 montant);\r\n    event VirementEffectue(address expediteur, address destinataire, uint256 montant);\r\n\r\n    constructor() {\r\n        owner = msg.sender;\r\n        dataFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);\r\n    }\r\n\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Seul le createur peut effectuer cette action.\");\r\n        _;\r\n    }\r\n\r\n    function donate() public payable {\r\n        require(msg.value > 0, \"Le montant doit etre superieur a zero.\");\r\n        emit DonationRecue(msg.sender, msg.value);\r\n    }\r\n\r\n    function withdraw() public onlyOwner {\r\n        uint256 solde = address(this).balance;\r\n        require(solde > 0, \"Le contrat est vide.\");\r\n        payable(owner).transfer(solde);\r\n        emit RetraitEffectue(owner, solde);\r\n    }\r\n\r\n    // Virement : le owner transfère un montant depuis le contrat vers un destinataire\r\n    function transferTo(address payable destinataire, uint256 montant) public onlyOwner {\r\n        require(destinataire != address(0), \"Adresse destinataire invalide.\");\r\n        require(montant > 0, \"Le montant doit etre superieur a zero.\");\r\n        require(montant <= address(this).balance, \"Fonds insuffisants dans le contrat.\");\r\n\r\n        destinataire.transfer(montant);\r\n\r\n        emit VirementEffectue(msg.sender, destinataire, montant);\r\n    }\r\n\r\n    function getBalance() public view returns (uint256) {\r\n        return address(this).balance;\r\n    }\r\n\r\n    function getUSDValue() public view returns (int) {\r\n\r\n    }\r\n}",
+        "file": "contracts/Donation.sol"
+      },
+      "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n// solhint-disable-next-line interface-starts-with-i\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(\n    uint80 _roundId\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n\n  function latestRoundData()\n    external\n    view\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n}\n",
+        "file": "@chainlink/contracts@1.5.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol"
       }
     }
   }
