@@ -3,25 +3,39 @@ pragma solidity >=0.8.2 <0.9.0;
 
 import "./Storage.sol";
 
-contract StorageFactory {
+// 'is Storage' = StorageFactory hérite de toutes les variables
+// et fonctions définies dans Storage
+contract StorageFactory is Storage {
 
-    // Tableau qui stocke toutes les instances Storage créées
-    // Storage[] est un type tableau d'objets de type contrat
     Storage[] public listeStorage;
 
     function createStorageContract() public {
-        // On crée l'instance ET on la sauvegarde dans le tableau
         Storage nouveauContrat = new Storage();
         listeStorage.push(nouveauContrat);
     }
 
-    // Retourne le nombre de contrats Storage déployés
     function getNombreContrats() public view returns (uint256) {
         return listeStorage.length;
     }
 
-    // Retourne l'adresse d'un contrat Storage par son index
     function getAdresseContrat(uint256 index) public view returns (address) {
         return address(listeStorage[index]);
+    }
+
+    // Appelle store() sur le contrat Storage à l'index donné
+    function sfStore(uint256 index, uint256 valeur) public {
+        require(index < listeStorage.length, "Index invalide.");
+
+        // On récupère la référence au contrat Storage[index]
+        // puis on appelle sa fonction store()
+        listeStorage[index].store(valeur);
+    }
+
+    // Appelle retrieve() sur le contrat Storage à l'index donné
+    function sfRetrieve(uint256 index) public view returns (uint256) {
+        require(index < listeStorage.length, "Index invalide.");
+
+        // On récupère la valeur stockée dans Storage[index]
+        return listeStorage[index].retrieve();
     }
 }

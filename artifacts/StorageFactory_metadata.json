@@ -62,11 +62,87 @@
 				],
 				"stateMutability": "view",
 				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "retrieve",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
+					}
+				],
+				"name": "sfRetrieve",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "valeur",
+						"type": "uint256"
+					}
+				],
+				"name": "sfStore",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "num",
+						"type": "uint256"
+					}
+				],
+				"name": "store",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
 			}
 		],
 		"devdoc": {
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"retrieve()": {
+					"details": "Return value ",
+					"returns": {
+						"_0": "value of 'number'"
+					}
+				},
+				"store(uint256)": {
+					"details": "Store value in variable",
+					"params": {
+						"num": "value to store"
+					}
+				}
+			},
 			"version": 1
 		},
 		"userdoc": {
@@ -100,11 +176,11 @@
 			]
 		},
 		"contracts/StorageFactory.sol": {
-			"keccak256": "0x09f81b44e6a7bc0f0569fb53f0ae07f355d7f30124da94bb0a8f99b60b88165d",
+			"keccak256": "0xa7489fa3ac1308ebb1a082f6ce034671761c52520c37f199fbec71fd3041ee73",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://eabcd950bee751f07e30d9d856fcb4c43f4ffc503ff981452b416f462351f1a7",
-				"dweb:/ipfs/QmWJPNZnm7ZMTTVvbK57MnadnQWBRxtx4gSHCHcohiVbj1"
+				"bzz-raw://c7ec35af88104f49a62c1864411d8600d2fb5fdb56405eb4b0c77dc22b83bd5f",
+				"dweb:/ipfs/QmQcovDcGgCz49R4YnT1de9XWcHPFqn59s722JQdSCFYyG"
 			]
 		}
 	},
