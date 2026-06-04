@@ -3,11 +3,9 @@ pragma solidity >=0.8.2 <0.9.0;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-
 contract Donation {
 
     AggregatorV3Interface internal dataFeed;
-
     address public owner;
 
     event DonationRecue(address donateur, uint256 montant);
@@ -36,14 +34,11 @@ contract Donation {
         emit RetraitEffectue(owner, solde);
     }
 
-    // Virement : le owner transfère un montant depuis le contrat vers un destinataire
     function transferTo(address payable destinataire, uint256 montant) public onlyOwner {
         require(destinataire != address(0), "Adresse destinataire invalide.");
         require(montant > 0, "Le montant doit etre superieur a zero.");
         require(montant <= address(this).balance, "Fonds insuffisants dans le contrat.");
-
         destinataire.transfer(montant);
-
         emit VirementEffectue(msg.sender, destinataire, montant);
     }
 
@@ -51,7 +46,40 @@ contract Donation {
         return address(this).balance;
     }
 
-    function getUSDValue() public view returns (int) {
+    // ── Récupère le prix ETH/USD depuis Chainlink ───────────────────────────
+    // Retourne le prix brut avec 8 décimales (ex: 250000000000 = 2500.00 USD)
+    function getEthUsdPrice() public view returns (int256) {
+        (
+            /* uint80 roundId */,
+            int256 answer,
+            /* uint256 startedAt */,
+            /* uint256 updatedAt */,
+            /* uint80 answeredInRound */
+        ) = dataFeed.latestRoundData();
+        return answer;
+    }
 
+    // ── Retourne la valeur de la cagnotte en dollars entiers ────────────────
+    //
+    // Formule :
+    //   balance (wei)    → 18 décimales
+    //   prix Chainlink   →  8 décimales
+    //   produit          → 26 décimales → on divise par 10^26 pour obtenir des USD
+    //
+    function getBalanceInUSD() public view returns (uint256) {
+        int256 prixBrut = getEthUsdPrice();
+
+        // Le prix Chainlink ne peut pas être négatif en pratique,
+        // mais int256 → uint256 nécessite une vérification
+        require(prixBrut > 0, "Prix oracle invalide.");
+
+        uint256 prix = uint256(prixBrut); // ex : 250000000000 pour 2500 USD
+
+        // Multiplication : balance_wei × prix (avec 8 décimales)
+        // Division par 10^26 pour annuler les 18 décimales du wei
+        // et les 8 décimales du prix Chainlink
+        uint256 valeurUSD = (address(this).balance * prix) / 1e26;
+
+        return valeurUSD; // valeur en dollars entiers
     }
 }

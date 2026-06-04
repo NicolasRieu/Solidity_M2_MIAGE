@@ -95,6 +95,32 @@
 			},
 			{
 				"inputs": [],
+				"name": "getBalanceInUSD",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getEthUsdPrice",
+				"outputs": [
+					{
+						"internalType": "int256",
+						"name": "",
+						"type": "int256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "owner",
 				"outputs": [
 					{
@@ -159,12 +185,20 @@
 		"remappings": []
 	},
 	"sources": {
+		"@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+			"keccak256": "0x257a8d28fa83d3d942547c8e129ef465e4b5f3f31171e7be4739a4c98da6b4f0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6d39e11b1dc7b9b8ccdabbc9be442ab7cda4a81c748f57e316dcb1bcb4a28bf9",
+				"dweb:/ipfs/QmaG6vz6W6iEUBsbHSBob5mdcitYxWjoygxREHpsJHfWrS"
+			]
+		},
 		"contracts/Donation.sol": {
-			"keccak256": "0x490fc357dd9ce332a6f2818ad2f8da61cd616754e0d401366f318a8cb972b42a",
+			"keccak256": "0x935b4ed8912953b0bb873068895749d488924efcf11ecdf5edf094b398250927",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://c74837ce65b650c9c61559b643ddf03bbcf1fa36a93834b985be4fbead945198",
-				"dweb:/ipfs/Qmc8fcMgCzuH8fwKo5bS7BFQkTELJZb5v1oSpPU7brBH5M"
+				"bzz-raw://211436bdd981d46547e1af5b1dfd9f12b506a4d2495af0392d18120957033948",
+				"dweb:/ipfs/QmNbro3vgu32S1Aof6k4XrypGbyHM66UhVQZxq1u2bbw1n"
 			]
 		}
 	},
